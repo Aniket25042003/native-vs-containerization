@@ -1,0 +1,2 @@
+timestamp,run_id,epoch_idx,epoch_time_s,throughput_samples_per_s,train_loss_epoch,val_loss_epoch,val_acc_epoch,avg_gpu_util_pct,max_gpu_mem_MiB,avg_cpu_percent,avg_host_ram_percent,docker_cpu,docker_mem,docker_io,k8s_cpu,k8s_mem,disk_read_MBps,disk_write_MBps,smi_util,smi_mem
+2025-09-29T17:21:03.526614,20250929T171130Z,0,486.854862,102.700,2.075379,1.661202,0.3892,,,69.62,80.54,,,,,,,,,
