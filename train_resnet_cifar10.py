@@ -37,7 +37,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-
+from torchvision.models import ResNet18_Weights
 # Monitoring libraries
 try:
     import psutil
@@ -196,11 +196,11 @@ def build_dataloaders(batch_size=128, num_workers=4):
                                             shuffle=False, num_workers=num_workers, pin_memory=True)
     return trainloader, valloader
 
-def build_model(num_classes=10, pretrained=False):
+def build_model(num_classes=10, weights=None):
     """
     Build ResNet-18 and adapt final FC layer.
     """
-    model = torchvision.models.resnet18(pretrained=pretrained)
+    model = torchvision.models.resnet18(weights=weights)
     # Modify last layer
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, num_classes)
@@ -214,7 +214,7 @@ def train_and_log(args):
     print("Device:", device, "GPU monitoring:", use_gpu_monitor)
 
     trainloader, valloader = build_dataloaders(batch_size=args.batch_size, num_workers=args.num_workers)
-    model = build_model(num_classes=10, pretrained=False).to(device)
+    model = build_model(num_classes=10, weights=None).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
@@ -441,6 +441,22 @@ def train_and_log(args):
     print(f"Training completed in {total_time:.2f}s. Logs saved to: {args.outdir}")
     step_csv_file.close()
     epoch_csv_file.close()
+    
+    # -----------------------
+    # Save models
+    # -----------------------
+    model.eval()
+    # Save state_dict (reproducibility, retraining possible)
+    state_dict_path = os.path.join(args.outdir, f"resnet18_cifar10_state_{ts}.pth")
+    torch.save(model.state_dict(), state_dict_path)
+    print(f"[INFO] Saved PyTorch state_dict to {state_dict_path}")
+    
+    # Save TorchScript model (for inference benchmarks & deployment)
+    example_input = torch.randn(1, 3, 32, 32).to(device)
+    scripted_model = torch.jit.trace(model, example_input)
+    torchscript_path = os.path.join(args.outdir, f"resnet18_cifar10_scripted_{ts}.pt")
+    scripted_model.save(torchscript_path)
+    print(f"[INFO] Saved TorchScript model to {torchscript_path}")
 
     if use_gpu_monitor:
         try:

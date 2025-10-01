@@ -1,0 +1,11 @@
+# Core ML libraries
+torch
+torchvision
+numpy
+
+# System monitoring
+psutil
+nvidia-ml-py3
+
+# Utilities
+argparse
