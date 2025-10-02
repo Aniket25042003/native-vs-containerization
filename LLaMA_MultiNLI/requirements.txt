@@ -1,0 +1,10 @@
+torch
+transformers
+datasets
+accelerate
+peft
+bitsandbytes
+psutil
+pynvml
+sentencepiece
+nvidia-ml-py
